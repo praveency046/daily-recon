@@ -14,7 +14,7 @@ jobs:
 
       - name: Commit and Push
         env:
-          GH_PAT: ${{ secrets.GH_PAT }}
+          GH_PAT: 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
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
