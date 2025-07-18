@@ -15,7 +15,7 @@ jobs:
       env:
         GH_PAT: ${{ secrets.GH_PAT }}
       run: |
-        git clone https://github.com/praveency046/daily-recon.git repo
+        git clone https://x-access-token:${GH_PAT}@github.com/praveency046/daily-recon.git repo
         cd repo
 
         echo "Test run at $(date)" >> test.txt
