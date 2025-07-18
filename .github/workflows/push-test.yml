@@ -7,24 +7,21 @@ jobs:
   push-test:
     runs-on: ubuntu-latest
 
+    env:
+      GH_PAT: ${{ secrets.GH_PAT }}
+
     steps:
-    - name: Install Git
-      run: sudo apt update && sudo apt install -y git
+      - name: Set up Git config
+        run: |
+          git config --global user.name "Praveen B"
+          git config --global user.email "praveenpraveen8407@gmail.com"
 
-    - name: Clone Public Repo
-      run: git clone https://github.com/praveency046/daily-recon.git
+      - name: Clone the repository with PAT
+        run: |
+          git clone https://x-access-token:${GH_PAT}@github.com/praveency046/daily-recon.git repo
+          cd repo
 
-    - name: Commit and Push
-      env:
-        GH_PAT: ${{ secrets.GH_PAT }}
-      run: |
-        cd daily-recon
-        echo "test from GitHub Actions at $(date)" > test.txt
-
-        git config --global user.name "Praveen B"
-        git config --global user.email "praveenpraveen8407@gmail.com"
-
-        git add test.txt
-        git commit -m "✅ Auto push test via GitHub Actions" || echo "Nothing to commit"
-
-        git push https://x-access-token:${GH_PAT}@github.com/praveency046/daily-recon.git
+          echo "Pushed from GitHub Actions at $(date)" > test.txt
+          git add test.txt
+          git commit -m "✅ Auto push test from Actions" || echo "Nothing to commit"
+          git push https://x-access-token:${GH_PAT}@github.com/praveency046/daily-recon.git
