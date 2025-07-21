@@ -38,9 +38,11 @@ jobs:
         run: |
           httpx -l $OUTPUT_DIR/data/subdomains.txt -silent -mc 200,301,302 > $OUTPUT_DIR/data/alive.txt
 
-      - name: 📜 Collect Wayback URLs
+      - name: 📜 Collect URLs from Gau for all alive subdomains
         run: |
-          cat $OUTPUT_DIR/data/alive.txt | waybackurls > $OUTPUT_DIR/data/waybackurls.txt
+          mkdir -p "$OUTPUT_DIR/data"
+          cat "$OUTPUT_DIR/data/alive.txt" | gau --threads 5 --retry 3 --o "$OUTPUT_DIR/data/waybackurls.txt"
+
 
       - name: 🔥 Run CORS Scanner (Corsy)
         run: |
