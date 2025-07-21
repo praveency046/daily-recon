@@ -50,4 +50,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: recon-results-${{ github.event.inputs.domain }}
-          path: /home/runner/data/
+          path: ${{ env.OUTPUT_DIR }}/data/
+          if-no-files-found: warn
+          compression-level: 6
+          overwrite: false
+          include-hidden-files: false
+
