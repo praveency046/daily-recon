@@ -44,7 +44,6 @@ jobs:
 
       - name: 🔥 Run CORS Scanner (Corsy)
         run: |
-          git clone https://github.com/s0md3v/Corsy.git /opt/Corsy
           corsy -i $OUTPUT_DIR/data/alive.txt -o $OUTPUT_DIR/data/corsy.json || echo "Corsy failed"
 
       - name: 📦 Upload Recon Artifacts
