@@ -1,0 +1,55 @@
+name: 🔍 Recon Scan with Custom Domain
+
+on:
+  workflow_dispatch:
+    inputs:
+      domain:
+        description: 'Enter the target domain (e.g. example.com)'
+        required: true
+
+env:
+  OUTPUT_DIR: /output
+
+jobs:
+  recon:
+    runs-on: ubuntu-latest
+    container:
+      image: drakon56/recon-suite:v2
+      volumes:
+        - /home/runner:/output
+
+    steps:
+      - name: 🖨️ Set Domain Variable
+        run: echo "DOMAIN=${{ github.event.inputs.domain }}" >> $GITHUB_ENV
+
+      - name: 📁 Create Output Directory
+        run: mkdir -p $OUTPUT_DIR/data
+
+      - name: 🔍 Subdomain Enumeration (Subfinder)
+        run: |
+          subfinder -d $DOMAIN -silent -o $OUTPUT_DIR/data/subdomains.txt
+
+      - name: 🚨 Subdomain Takeover Detection (Subzy)
+        run: |
+          subzy run --targets $OUTPUT_DIR/data/subdomains.txt \
+            --hide_fails --timeout 10 --concurrency 50 > $OUTPUT_DIR/data/subzy.txt || true
+
+      - name: 🌐 Check Alive Domains (httpx)
+        run: |
+          httpx -l $OUTPUT_DIR/data/subdomains.txt -silent -mc 200,301,302 > $OUTPUT_DIR/data/alive.txt
+
+      - name: 📜 Collect Wayback URLs
+        run: |
+          cat $OUTPUT_DIR/data/alive.txt | waybackurls > $OUTPUT_DIR/data/waybackurls.txt
+
+      - name: 🔥 Run CORS Scanner (Corsy)
+        run: |
+          git clone https://github.com/s0md3v/Corsy.git /opt/Corsy
+          cd /opt/Corsy
+          python3 corsy.py -i $OUTPUT_DIR/data/alive.txt -o $OUTPUT_DIR/data/corsy.json || echo "Corsy failed"
+
+      - name: 📦 Upload Recon Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: recon-results-${{ github.event.inputs.domain }}
+          path: /home/runner/data/
