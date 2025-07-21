@@ -45,8 +45,7 @@ jobs:
       - name: 🔥 Run CORS Scanner (Corsy)
         run: |
           git clone https://github.com/s0md3v/Corsy.git /opt/Corsy
-          cd /opt/Corsy
-          python3 corsy.py -i $OUTPUT_DIR/data/alive.txt -o $OUTPUT_DIR/data/corsy.json || echo "Corsy failed"
+          corsy -i $OUTPUT_DIR/data/alive.txt -o $OUTPUT_DIR/data/corsy.json || echo "Corsy failed"
 
       - name: 📦 Upload Recon Artifacts
         uses: actions/upload-artifact@v4
