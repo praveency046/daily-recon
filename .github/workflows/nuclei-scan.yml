@@ -1,0 +1,51 @@
+name: 🚀 Nuclei Scan on Provided URLs
+
+on:
+  workflow_dispatch:
+    inputs:
+      input_file:
+        description: 'Path to input file (e.g., urls.txt)'
+        required: true
+        default: 'urls.txt'
+
+env:
+  OUTPUT_DIR: /output
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    container:
+      image: drakon56/recon-suite:v2
+      volumes:
+        - /home/runner:/output
+
+    steps:
+      - name: ⬇️ Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🖨️ Set Input File Variable
+        run: echo "INPUT_FILE=${{ github.event.inputs.input_file }}" >> $GITHUB_ENV
+
+      - name: 📁 Create Output Directory
+        run: mkdir -p $OUTPUT_DIR/data
+
+      - name: 📥 Download Nuclei Templates
+        run: git clone https://github.com/projectdiscovery/nuclei-templates.git ~/nuclei-templates || echo "Templates already cloned"
+
+      - name: 🧨 Run Nuclei Scan
+        run: |
+          if [ -f $INPUT_FILE ]; then
+            nuclei -l $INPUT_FILE \
+              -t ~/nuclei-templates/ \
+              -severity critical,high,medium \
+              -o $OUTPUT_DIR/data/nuclei_results.txt || echo "Nuclei scan failed"
+          else
+            echo "Input file not found: $INPUT_FILE"
+            exit 1
+          fi
+
+      - name: 📦 Upload Scan Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: nuclei-results
+          path: /home/runner/data/
